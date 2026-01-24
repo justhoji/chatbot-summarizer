@@ -5,9 +5,11 @@ import OpenAI from 'openai';
 dotenv.config();
 
 const client = new OpenAI();
+
 const app = express();
-app.use(express.json());
 const port = process.env.PORT || 3000;
+
+app.use(express.json());
 
 app.get('/', (req: Request, res: Response) => {
    res.send('HEllo world!');
@@ -19,14 +21,16 @@ app.get('/api/hello', (req: Request, res: Response) => {
    });
 });
 
+const conversations = new Map<string, string>();
 app.post('/api/chat', async (req: Request, res: Response) => {
-   const { prompt } = req.body;
+   const { prompt, conversationId } = req.body;
    const response = await client.responses.create({
       model: 'gpt-5-nano',
       input: prompt,
-      temperature: 0.2,
-      max_output_tokens: 100,
+      max_output_tokens: 800,
+      previous_response_id: conversations.get(conversationId),
    });
+   conversations.set(conversationId, response.id);
    res.json({ message: response.output_text });
 });
 app.listen(port, () => {
