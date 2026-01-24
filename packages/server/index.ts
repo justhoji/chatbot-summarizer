@@ -2,6 +2,7 @@ import express, { type Request, type Response } from 'express';
 import dotenv from 'dotenv';
 import OpenAI from 'openai';
 import z from 'zod';
+import { conversationRepository } from './repositories/conversation.repository';
 dotenv.config();
 
 const client = new OpenAI();
@@ -31,7 +32,6 @@ const chatSchema = z.object({
    conversationId: z.uuid('Invalid UUID'),
 });
 
-const conversations = new Map<string, string>();
 app.post('/api/chat', async (req: Request, res: Response) => {
    try {
       const { prompt, conversationId } = req.body;
@@ -46,9 +46,10 @@ app.post('/api/chat', async (req: Request, res: Response) => {
          model: 'gpt-5-nano',
          input: prompt,
          max_output_tokens: 800,
-         previous_response_id: conversations.get(conversationId),
+         previous_response_id:
+            conversationRepository.getLastResponseId(conversationId),
       });
-      conversations.set(conversationId, response.id);
+      conversationRepository.setLasResponseId(conversationId, response.id);
       res.json({ message: response.output_text });
    } catch (error) {
       res.status(500).json({
