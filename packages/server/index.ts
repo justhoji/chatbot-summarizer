@@ -33,22 +33,28 @@ const chatSchema = z.object({
 
 const conversations = new Map<string, string>();
 app.post('/api/chat', async (req: Request, res: Response) => {
-   const { prompt, conversationId } = req.body;
-   const { success, data, error } = chatSchema.safeParse(req.body);
-   if (!success) {
-      res.status(400).json({
-         error: error,
+   try {
+      const { prompt, conversationId } = req.body;
+      const { success, error } = chatSchema.safeParse(req.body);
+      if (!success) {
+         res.status(400).json({
+            error: error,
+         });
+         return;
+      }
+      const response = await client.responses.create({
+         model: 'gpt-5-nano',
+         input: prompt,
+         max_output_tokens: 800,
+         previous_response_id: conversations.get(conversationId),
       });
-      return;
+      conversations.set(conversationId, response.id);
+      res.json({ message: response.output_text });
+   } catch (error) {
+      res.status(500).json({
+         error: 'Failed to generate response.',
+      });
    }
-   const response = await client.responses.create({
-      model: 'gpt-5-nano',
-      input: prompt,
-      max_output_tokens: 800,
-      previous_response_id: conversations.get(conversationId),
-   });
-   conversations.set(conversationId, response.id);
-   res.json({ message: response.output_text });
 });
 app.listen(port, () => {
    console.log(`Server listening on port ${port}...`);
