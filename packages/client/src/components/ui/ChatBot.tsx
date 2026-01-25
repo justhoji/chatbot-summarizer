@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { Button } from './button';
 import { FaArrowUp } from 'react-icons/fa';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 
 type ChatInput = {
    prompt: string;
