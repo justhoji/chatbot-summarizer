@@ -19,9 +19,14 @@ type Message = {
 
 const ChatBot = () => {
    const conversationId = React.useRef(crypto.randomUUID());
+   const formRef = React.useRef<HTMLFormElement | null>(null);
    const [messages, setMessages] = React.useState<Message[]>([]);
    const [isBotTyping, setIsBotTyping] = React.useState<boolean>(false);
    const { register, handleSubmit, reset, formState } = useForm<ChatInput>();
+
+   React.useEffect(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth' });
+   }, [messages]);
    const onSubmit: SubmitHandler<ChatInput> = async ({ prompt }: ChatInput) => {
       setMessages((prev) => [...prev, { content: prompt, role: 'user' }]);
       setIsBotTyping(true);
@@ -74,6 +79,7 @@ const ChatBot = () => {
          <form
             onSubmit={handleSubmit(onSubmit)}
             onKeyDown={onKeyDown}
+            ref={formRef}
             className="flex flex-col items-end gap-3 border-2 rounded-2xl p-4"
          >
             <textarea
