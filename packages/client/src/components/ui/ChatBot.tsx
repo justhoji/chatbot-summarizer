@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
-import { Button } from './button';
 import { FaArrowUp } from 'react-icons/fa';
 import axios from 'axios';
+import ReactMarkdown from 'react-markdown';
+import { Button } from './button';
 
 type ChatInput = {
    prompt: string;
@@ -24,15 +25,16 @@ const ChatBot = () => {
    const onSubmit: SubmitHandler<ChatInput> = async ({ prompt }: ChatInput) => {
       setMessages((prev) => [...prev, { content: prompt, role: 'user' }]);
       try {
+         reset();
          const { data } = await axios.post<ChatResponse>('/api/chat', {
             prompt,
             conversationId: conversationId.current,
          });
+
          setMessages((prev) => [
             ...prev,
             { content: data.message, role: 'bot' },
          ]);
-         reset();
       } catch (error) {
          console.log(error);
       }
@@ -55,7 +57,7 @@ const ChatBot = () => {
                   }`}
                   key={index}
                >
-                  {message.content}
+                  <ReactMarkdown>{message.content}</ReactMarkdown>
                </p>
             ))}
          </div>

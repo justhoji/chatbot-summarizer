@@ -15,7 +15,6 @@ export const chatService = {
       const response = await client.responses.create({
          model: 'gpt-5-nano',
          input: prompt,
-         max_output_tokens: 800,
          previous_response_id:
             conversationRepository.getLastResponseId(conversationId),
       });
