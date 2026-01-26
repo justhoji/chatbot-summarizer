@@ -22,17 +22,19 @@ const ChatBot = () => {
    const lastMessageRef = React.useRef<HTMLDivElement | null>(null);
    const [messages, setMessages] = React.useState<Message[]>([]);
    const [isBotTyping, setIsBotTyping] = React.useState<boolean>(false);
+   const [error, setError] = React.useState<string>('');
    const { register, handleSubmit, reset, formState } = useForm<ChatInput>();
 
    React.useEffect(() => {
       lastMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
    }, [messages]);
    const onSubmit = async ({ prompt }: ChatInput) => {
-      setMessages((prev) => [...prev, { content: prompt, role: 'user' }]);
-      setIsBotTyping(true);
       try {
+         setMessages((prev) => [...prev, { content: prompt, role: 'user' }]);
+         setIsBotTyping(true);
+         setError('');
          reset({ prompt: '' });
-         const { data } = await axios.post<ChatResponse>('/api/chat', {
+         const { data } = await axios.post<ChatResponse>('/api/chatx', {
             prompt,
             conversationId: conversationId.current,
          });
@@ -44,6 +46,7 @@ const ChatBot = () => {
          setIsBotTyping(false);
       } catch (error) {
          console.log(error);
+         setError('Something went wrong!');
          setIsBotTyping(false);
       }
    };
@@ -84,6 +87,7 @@ const ChatBot = () => {
                   <div className="w-2 h-2 rounded-full bg-gray-800 animate-pulse [animation-delay:0.4s]"></div>
                </div>
             )}
+            {error && <p className="text-red-500">{error}</p>}
          </div>
          <form
             onSubmit={handleSubmit(onSubmit)}
