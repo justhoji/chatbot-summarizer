@@ -19,19 +19,19 @@ type Message = {
 
 const ChatBot = () => {
    const conversationId = React.useRef(crypto.randomUUID());
-   const formRef = React.useRef<HTMLFormElement | null>(null);
+   const lastMessageRef = React.useRef<HTMLDivElement | null>(null);
    const [messages, setMessages] = React.useState<Message[]>([]);
    const [isBotTyping, setIsBotTyping] = React.useState<boolean>(false);
    const { register, handleSubmit, reset, formState } = useForm<ChatInput>();
 
    React.useEffect(() => {
-      formRef.current?.scrollIntoView({ behavior: 'smooth' });
+      lastMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
    }, [messages]);
    const onSubmit = async ({ prompt }: ChatInput) => {
       setMessages((prev) => [...prev, { content: prompt, role: 'user' }]);
       setIsBotTyping(true);
       try {
-         reset();
+         reset({ prompt: '' });
          const { data } = await axios.post<ChatResponse>('/api/chat', {
             prompt,
             conversationId: conversationId.current,
@@ -61,10 +61,10 @@ const ChatBot = () => {
       }
    };
    return (
-      <div>
-         <div className="flex flex-col gap-3 mb-10">
+      <div className="flex flex-col h-full">
+         <div className="flex flex-col flex-1 gap-3 mb-10 overflow-y-auto">
             {messages.map((message, index) => (
-               <p
+               <div
                   className={`px-3 py-1 rounded-xl ${
                      message.role === 'user'
                         ? 'bg-blue-600 text-white self-end'
@@ -72,9 +72,10 @@ const ChatBot = () => {
                   }`}
                   key={index}
                   onCopy={onCopy}
+                  ref={index === messages.length - 1 ? lastMessageRef : null}
                >
                   <ReactMarkdown>{message.content}</ReactMarkdown>
-               </p>
+               </div>
             ))}
             {isBotTyping && (
                <div className="flex gap-1 bg-gray-200 rounded-xl self-start px-3 py-3">
@@ -87,7 +88,6 @@ const ChatBot = () => {
          <form
             onSubmit={handleSubmit(onSubmit)}
             onKeyDown={onKeyDown}
-            ref={formRef}
             className="flex flex-col items-end gap-3 border-2 rounded-2xl p-4"
          >
             <textarea
@@ -100,6 +100,7 @@ const ChatBot = () => {
                maxLength={1000}
                name="prompt"
                id="prompt"
+               autoFocus
             />
             <Button
                disabled={!formState.isValid}
