@@ -27,7 +27,7 @@ const ChatBot = () => {
    React.useEffect(() => {
       formRef.current?.scrollIntoView({ behavior: 'smooth' });
    }, [messages]);
-   const onSubmit: SubmitHandler<ChatInput> = async ({ prompt }: ChatInput) => {
+   const onSubmit = async ({ prompt }: ChatInput) => {
       setMessages((prev) => [...prev, { content: prompt, role: 'user' }]);
       setIsBotTyping(true);
       try {
@@ -53,6 +53,13 @@ const ChatBot = () => {
          handleSubmit(onSubmit)();
       }
    };
+   const onCopy = (e: React.ClipboardEvent<HTMLParagraphElement>) => {
+      const selection = window.getSelection()?.toString().trim();
+      if (selection) {
+         e.preventDefault();
+         e.clipboardData.setData('text/plain', selection);
+      }
+   };
    return (
       <div>
          <div className="flex flex-col gap-3 mb-10">
@@ -64,6 +71,7 @@ const ChatBot = () => {
                         : 'bg-gray-100 text-black self-start'
                   }`}
                   key={index}
+                  onCopy={onCopy}
                >
                   <ReactMarkdown>{message.content}</ReactMarkdown>
                </p>
