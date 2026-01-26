@@ -35,7 +35,7 @@ const ChatBot = () => {
          setIsBotTyping(true);
          setError('');
          reset({ prompt: '' });
-         const { data } = await axios.post<ChatResponse>('/api/chatx', {
+         const { data } = await axios.post<ChatResponse>('/api/chat', {
             prompt,
             conversationId: conversationId.current,
          });
