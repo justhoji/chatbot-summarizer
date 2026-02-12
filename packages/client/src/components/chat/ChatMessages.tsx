@@ -26,7 +26,7 @@ const ChatMessages = ({ messages }: Props) => {
       <div className="flex flex-col gap-3">
          {messages.map((message, index) => (
             <div
-               className={`px-3 py-1 rounded-xl ${
+               className={`px-3 py-1 max-w-md rounded-xl ${
                   message.role === 'user'
                      ? 'bg-blue-600 text-white self-end'
                      : 'bg-gray-100 text-black self-start'
